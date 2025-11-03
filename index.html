@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Gerenciamento - FAST4U </title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 250px;
+            background: #b71c1c; /* Rich red color */
+            color: white;
+            padding: 20px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .nav-links {
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin-bottom: 15px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            display: block;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            background: #d32f2f; /* Medium red for buttons */
+        }
+
+        .nav-links a:hover {
+            background: #7f0000; /* Dark red on hover */
+            transform: translateX(5px);
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 40px;
+            background: #f5f5f5;
+        }
+
+        .header {
+            margin-bottom: 30px;
+            color: #b71c1c; /* Red color for headers */
+        }
+
+        .header h1 {
+            color: #b71c1c;
+            margin-bottom: 10px;
+        }
+
+        .content-section {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(183, 28, 28, 0.1); /* Subtle red shadow */
+            border-left: 4px solid #b71c1c; /* Red accent border */
+        }
+
+        h2, h3 {
+            color: #b71c1c; /* Red color for subheadings */
+            margin-bottom: 15px;
+        }
+
+        /* If you want to add actual buttons later, here's the style */
+        .button {
+            background: #d32f2f;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .button:hover {
+            background: #7f0000;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">Gerenciamento - FAST4U</div>
+        <ul class="nav-links">
+            <li><a href="#" onclick="showSection('main')">Home</a></li>
+            <li><a href="#" onclick="showSection('clientes')">Clientes</a></li>
+            <li><a href="#" onclick="showSection('dashboard')">Dashboard</a></li>
+            <li><a href="#" onclick="showSection('testepedidos')">Testes do Sistema - Pedidos</a></li>
+            <li><a href="#" onclick="showSection('configs')">Configurações</a></li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <h1>Bem-vindo ao FAST4U</h1>
+            <p>Sistema de gerenciamento</p>
+        </div>
+        
+        <!-- Main Section -->
+        <div id="main-section" class="content-section">
+            <h2>Página Principal</h2>
+            <p>Bem-vindo, Gerente! Use o menu lateral para navegar.</p>
+            
+            <h3>Funcionalidades:</h3>
+            <ul>
+                <li>Gerenciar clientes</li>
+                <li>Visualizar dados do sistema</li>
+                <li>Configurações</li>
+            </ul>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard-section" class="content-section" style="display: none;">
+            <h2>📊 Dashboard Financeiro</h2>
+            
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h3>💰 Receita Total do App</h3>
+                    <p id="total-app-revenue">R$ 0,00</p>
+                </div>
+                <div class="metric-card">
+                    <h3>📦 Total de Pedidos</h3>
+                    <p id="contagem-total-pedidos">0</p>
+                </div>
+                <div class="metric-card">
+                    <h3>🏪 Restaurantes Ativos</h3>
+                    <p id="restaurantes-ativos">5</p>
+                </div>
+                <div class="metric-card">
+                    <h3>📈 Taxa do App</h3>
+                    <p>15% por pedido</p>
+                </div>
+            </div>
+
+            <div class="charts-container">
+                <div class="chart-section">
+                    <h3>🏆 Ranking de Restaurantes</h3>
+                    <div id="ranking-restaus">
+                        <!-- Ranking será gerado aqui -->
+                    </div>
+                </div>
+                
+                <div class="chart-section">
+                    <h3>👥 Relação Cliente x Restaurante</h3>
+                    <div id="clients-preferences">
+                        <!-- Em desenvolvimento -->
+                        <p>Funcionalidade em desenvolvimento...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Clientes Section -->
+        <div id="clientes-section" class="content-section" style="display: none;">
+            <h2>Clientes</h2>
+            <div id="clientes-list">
+                <p>Carregando clientes...</p>
+            </div>
+        </div>
+
+        <!-- Teste Pedidos Section -->
+        <div id="testepedidos-section" class="content-section" style="display: none;">
+            <h2>🧪 Teste do Sistema de Pedidos</h2>
+            
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                <h3>Criar Pedido de Teste</h3>
+                
+                <label><strong>Restaurante:</strong></label><br>
+                <select id="test-restaurant" style="padding: 8px; margin: 10px 0; width: 200px;">
+                    <option value="McDonalds">McDonalds</option>
+                    <option value="BurgerKing">Burger King</option>
+                    <option value="SodieDoces">Sodie Doces</option>
+                    <option value="PizzaHut">Pizza Hut</option>
+                    <option value="Ragazzo">Ragazzo</option>
+                </select>
+                
+                <br><br>
+                
+                <label><strong>Valor do Pedido (R$):</strong></label><br>
+                <input type="number" id="test-order-value" placeholder="Ex: 29.90" min="10" step="0.01" 
+                       style="padding: 8px; margin: 10px 0; width: 200px;">
+                
+                <br><br>
+                
+                <label><strong>Email do Cliente (para teste):</strong></label><br>
+                <input type="email" id="test-client-email" placeholder="cliente@exemplo.com" 
+                       style="padding: 8px; margin: 10px 0; width: 200px;">
+                
+                <br><br>
+                
+                <!-- NA SEÇÃO testepedidos-section - CORRIGIR O BOTÃO -->
+                <button onclick="createTestOrder()" class="button" 
+                        style="padding: 10px 20px; font-size: 16px;">
+                    🧪 Criar Pedido Teste
+                </button>
+            </div>
+        </div>
+
+        <!-- Configurações Section -->
+        <div id="configs-section" class="content-section" style="display: none;">
+            <h1 style="font-style: italic;"><strong>Configurações</strong></h1>
+            <br>
+            <p>O Botão abaixo reinicia os documentos dentro de "Restaurantes" NO FIRESTORE.</p>
+            <p>USE COM MUITO CUIDADO! PODE HAVER DATA LOSS!</p>
+            <br>
+            <div>
+                <button onclick="initRestaurante()" class="button" 
+                        style="background-color: #ff4444; border: 2px dashed white;">
+                    ⚠️ REINICIAR RESTAURANTES-INFO
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ORDEM CORRETA DOS SCRIPTS -->
+    <script src="scripts/firebaseconf.js"></script>
+    <script src="scripts/mainFuncs.js"></script>
+    <script src="scripts/sistemaPedidos.js"></script> <!-- Primeiro Funcional -->
+    <script src="scripts/startProc/init.js"></script>
+    <script src="scripts/firebaseRestsRESET.js"></script>
+    <script src="scripts/firebaseData.js"></script>
+    <script src="scripts/calculosFinan.js"></script>
+    <script src="scripts/metricasFinan.js"></script>
+</body>
+</html>
