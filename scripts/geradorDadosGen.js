@@ -384,3 +384,63 @@ async function gerarDadosTeste() {
 async function limparDadosTeste() {
     await geradorDados.limparDadosTeste();
 }
+
+async function atualizarEstatisticas() {
+    try {
+        console.log("📊 Atualizando estatísticas com transição...");
+        
+        const container = document.getElementById('estatisticas-atuais');
+        if (container) {
+            container.classList.add('pulse-loading');
+        }
+
+        const [clientesSnapshot, pedidosSnapshot, restaurantesSnapshot] = await Promise.all([
+            db.collection("usuarios").get(),
+            db.collection("pedidos").get(),
+            db.collection("restaurantes").get()
+        ]);
+
+        const estatisticas = {
+            totalClientes: clientesSnapshot.size,
+            totalPedidos: pedidosSnapshot.size,
+            totalRestaurantes: restaurantesSnapshot.size,
+            receitaTotal: pedidosSnapshot.docs.reduce((sum, doc) => sum + (doc.data().taxaApp || 0), 0)
+        };
+
+        if (container) {
+            container.innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+                    <div class="metric-card" style="text-align: center; padding: 15px; background: linear-gradient(135deg, #b71c1c, #d32f2f); color: white; border-radius: 8px;">
+                        <strong>👥 Clientes</strong><br>
+                        <span style="font-size: 24px; font-weight: bold;">${estatisticas.totalClientes}</span>
+                    </div>
+                    <div class="metric-card" style="text-align: center; padding: 15px; background: linear-gradient(135deg, #1976d2, #42a5f5); color: white; border-radius: 8px;">
+                        <strong>📦 Pedidos</strong><br>
+                        <span style="font-size: 24px; font-weight: bold;">${estatisticas.totalPedidos}</span>
+                    </div>
+                    <div class="metric-card" style="text-align: center; padding: 15px; background: linear-gradient(135deg, #388e3c, #66bb6a); color: white; border-radius: 8px;">
+                        <strong>🏪 Restaurantes</strong><br>
+                        <span style="font-size: 24px; font-weight: bold;">${estatisticas.totalRestaurantes}</span>
+                    </div>
+                    <div class="metric-card" style="text-align: center; padding: 15px; background: linear-gradient(135deg, #f57c00, #ffb74d); color: white; border-radius: 8px;">
+                        <strong>💰 Receita</strong><br>
+                        <span style="font-size: 20px; font-weight: bold;">R$ ${estatisticas.receitaTotal.toFixed(2)}</span>
+                    </div>
+                </div>
+            `;
+            
+            // Remover loading e adicionar fade-in
+            setTimeout(() => {
+                container.classList.remove('pulse-loading');
+                container.classList.add('fade-in');
+            }, 300);
+        }
+    } catch (error) {
+        console.error("❌ Erro ao carregar estatísticas:", error);
+        const container = document.getElementById('estatisticas-atuais');
+        if (container) {
+            container.innerHTML = '<p>Erro ao carregar estatísticas</p>';
+            container.classList.remove('pulse-loading');
+        }
+    }
+}
