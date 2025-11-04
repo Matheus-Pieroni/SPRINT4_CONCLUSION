@@ -1,4 +1,4 @@
-// scripts/sistemaPedidos.js - VERSÃO CORRIGIDA
+/* scripts/sistemaPedidos.js - VERSÃO CORRIGIDA
 const TAXA_FIXA = 0.15;
 
 // Função para criar um novo pedido - CORRIGIDA
@@ -103,4 +103,4 @@ async function createTestOrder() {
     return success;
 }
 
-console.log("✅ sistemaPedidos.js carregado com createTestOrder!");
+console.log("✅ sistemaPedidos.js carregado com createTestOrder!");*/

@@ -131,8 +131,8 @@
             <li><a href="#" onclick="showSection('main')">Home</a></li>
             <li><a href="#" onclick="showSection('clientes')">Clientes</a></li>
             <li><a href="#" onclick="showSection('dashboard')">Dashboard</a></li>
-            <li><a href="#" onclick="showSection('testepedidos')">Testes do Sistema - Pedidos</a></li>
-            <li><a href="#" onclick="showSection('configs')">Configurações</a></li>
+            <!--<li><a href="#" onclick="showSection('testepedidos')">Testes do Sistema - Pedidos</a></li> ISOLADO POR SER OBSOLETO -->
+            <li><a href="#" onclick="showSection('configs')">Configurações & Testes</a></li>
         </ul>
     </div>
 
@@ -184,14 +184,13 @@
                     <h3>🏆 Ranking de Restaurantes</h3>
                     <div id="ranking-restaus">
                         <!-- Ranking será gerado aqui -->
-                    </div>
+                    </div><br>
                 </div>
                 
-                <div class="chart-section">
-                    <h3>👥 Relação Cliente x Restaurante</h3>
+                <div class="chart-section"><br>
+                    <h3>👥 Relação Cliente x Restaurante Preferido</h3>
                     <div id="clients-preferences">
-                        <!-- Em desenvolvimento -->
-                        <p>Funcionalidade em desenvolvimento...</p>
+                        <p>Carregando preferências...</p>
                     </div>
                 </div>
             </div>
@@ -253,10 +252,76 @@
             <div>
                 <button onclick="initRestaurante()" class="button" 
                         style="background-color: #ff4444; border: 2px dashed white;">
-                    ⚠️ REINICIAR RESTAURANTES-INFO
+                    ⚠️ <strong>REINICIAR RESTAURANTES-INFO</strong> ⚠️
                 </button>
             </div>
+            <div style="width: max-content; height: 35px; margin: 5px;"></div> <!-- ESPAÇAMENtO MAIS INtereSSANTE-->
+            <p>O Botão abaixo realiza a <strong>INSERÇÃO DE DADOS GENÉRICOS NO FIRESTORE.</strong></p>
+            <br>
+            <p><strong>Deve ser utilizado somente para testes das funcionalidades do sistema.</strong></p>
+            <p>USE COM MUITO CUIDADO! PODE HAVER DATA LOSS!</p>
+            <br>
+            <div>
+                <a href="#" onclick="showSection('dados-teste')" 
+                        style="background-color: #ff4444; border: 2px dashed white; margin: 3px; padding: 5px; text-decoration: none; color: aliceblue;">
+                    ⚠️ <strong>OPÇÕES - DADOS DO FIRESTORE</strong> ⚠️
+                </a>
+            </div>
+            <!-- Adicione esta seção no main-content -->
         </div>
+        <div id="dados-teste-section" class="content-section" style="display: none;">
+                <h2>🧪 Gerador de Dados de Teste</h2>
+                <p>Use esta ferramenta para popular o banco de dados com dados fictícios para testes.</p>
+                
+                <div style="background: #fff3cd; padding: 20px; border-radius: 8px; border: 1px solid #ffeaa7; margin: 20px 0;">
+                    <h3 style="color: #856404;">⚡ Ações Rápidas</h3>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0;">
+                        <button onclick="gerarDadosTeste()" class="button" 
+                                style="background: #28a745; padding: 15px;">
+                            🎯 Gerar Dados de Teste<br>
+                            <small>(20 clientes + 50 pedidos)</small>
+                        </button>
+                        
+                        <button onclick="geradorDados.gerarDadosCompletos(10, 25)" class="button"
+                                style="background: #17a2b8; padding: 15px;">
+                            🧪 Teste Pequeno<br>
+                            <small>(10 clientes + 25 pedidos)</small>
+                        </button>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <button onclick="geradorDados.gerarClientes(5)" class="button"
+                                style="background: #6f42c1; padding: 12px;">
+                            👥 Apenas Clientes<br>
+                            <small>(5 novos clientes)</small>
+                        </button>
+                        
+                        <button onclick="geradorDados.gerarPedidos(10)" class="button"
+                                style="background: #fd7e14; padding: 12px;">
+                            📦 Apenas Pedidos<br>
+                            <small>(10 novos pedidos)</small>
+                        </button>
+                    </div>
+                </div>
+
+                <div style="background: #f8d7da; padding: 20px; border-radius: 8px; border: 1px solid #f5c6cb; margin: 20px 0;">
+                    <h3 style="color: #721c24;">⚠️ Zona de Perigo</h3>
+                    <p><strong>ATENÇÃO:</strong> Estas ações não podem ser desfeitas!</p>
+                    
+                    <button onclick="limparDadosTeste()" class="button"
+                            style="background: #dc3545; border: 2px dashed white; padding: 12px;">
+                        🗑️ LIMPAR TODOS OS DADOS
+                    </button>
+                </div>
+
+                <div style="margin-top: 30px;">
+                    <h4>📊 Estatísticas Atuais</h4>
+                    <div id="estatisticas-atuais">
+                        <p>Carregando...</p>
+                    </div>
+                </div>
+            </div>
     </div>
 
     <!-- ORDEM CORRETA DOS SCRIPTS -->
@@ -268,5 +333,6 @@
     <script src="scripts/firebaseData.js"></script>
     <script src="scripts/calculosFinan.js"></script>
     <script src="scripts/metricasFinan.js"></script>
+    <script src="scripts/geradorDadosGen.js"></script>
 </body>
 </html>
