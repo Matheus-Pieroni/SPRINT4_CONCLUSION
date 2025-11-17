@@ -14,33 +14,36 @@ function showSection(sectionName) {
     const oldSection = currentSection;
     currentSection = sectionName;
     
-    // 1. Primeiro, preparamos a transição de saída
+    // 1. Primeiro, preparamos a transição de saída - OCULTAR TODAS
     const sections = document.querySelectorAll('.content-section');
     sections.forEach(section => {
         section.classList.remove('active');
+        section.style.display = 'none';
     });
     
-    // 2. Adicionamos classe de loading temporariamente
+    // 2. Obter a seção alvo
     const targetSection = document.getElementById(sectionName + '-section');
     if (!targetSection) {
         console.error("❌ Seção não encontrada:", sectionName + '-section');
         return;
     }
     
+    // 3. Mostrar a seção com display block
+    targetSection.style.display = 'block';
     targetSection.classList.add('loading-content');
     
-    // 3. Pequeno delay para a transição de saída
+    // 4. Pequeno delay para a transição de saída
     setTimeout(() => {
-        // 4. Removemos loading e ativamos a nova seção
+        // 5. Removemos loading e ativamos a nova seção
         targetSection.classList.remove('loading-content');
         targetSection.classList.add('active');
         
         console.log("✅ Seção mostrada:", sectionName);
         
-        // 5. Carregar dados específicos da seção
+        // 6. Carregar dados específicos da seção
         carregarDadosDaSecao(sectionName);
         
-    }, 400);
+    }, 100);
 }
 
 // Função para carregar dados específicos de cada seção
@@ -115,13 +118,23 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Pequeno delay para garantir que tudo está carregado
     setTimeout(() => {
+        // 1. Ocultar todas as seções
+        const sections = document.querySelectorAll('.content-section');
+        sections.forEach(section => {
+            section.style.display = 'none';
+            section.classList.remove('active');
+        });
+        
+        // 2. Mostrar a seção principal
         const mainSection = document.getElementById('main-section');
+
         if (mainSection) {
+            mainSection.style.display = 'block';
             mainSection.classList.add('active');
-            console.log('✅ Seção principal ativada com transição');
+            console.log('🎯 Seção principal exibida');
         }
         
-        // Inicializar Firebase se disponível
+        // 3. Inicializar Firebase se disponível
         if (typeof db !== 'undefined') {
             console.log('🔥 Firebase pronto');
         }

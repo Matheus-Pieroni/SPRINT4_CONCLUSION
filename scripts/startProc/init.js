@@ -1,6 +1,14 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Dando start em todos os scripts...');
 
+    const dashboardSection = document.getElementById('dashboard-section');
+    const clientesSection = document.getElementById('clientes-section');
+    const testepedidosSection = document.getElementById('testepedidos-section');
+
+    dashboardSection.style.display = 'none';
+    clientesSection.style.display = 'none';
+    testepedidosSection.style.display = 'none';
+
     // Verificando a integridade do banco de dados do Firebase... ;-;
     if (typeof db !== 'undefined') {
         console.log("Firebase conectado com sucesso!");

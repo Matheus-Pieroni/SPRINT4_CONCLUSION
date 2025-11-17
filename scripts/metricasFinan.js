@@ -23,6 +23,10 @@ async function carregDashboardFinanceiro() {
         calculusMetricaFinan(pedidos, restaurantes, usuarios);
         mostrarRelacaoClienteRestaurante(usuarios, restaurantes);
         gerarRankRestaus(restaurantes); // ✅ Função com nome correto
+        // Atualizar gráfico de pizza com os dados de restaurantes
+        if (typeof atualizarGraficoPizza !== 'undefined') {
+            atualizarGraficoPizza(restaurantes);
+        }
 
     } catch (error) {
         console.error("❌ Erro ao carregar dashboard:", error);
