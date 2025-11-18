@@ -28,6 +28,15 @@ async function carregDashboardFinanceiro() {
             atualizarGraficoPizza(restaurantes);
         }
 
+        // Gerar automaticamente o arquivo JSON (array) de restaurantes+pedidos ao carregar o dashboard
+        if (typeof gerarArquivoRestaurantesPedidosDownload === 'function') {
+            try {
+                gerarArquivoRestaurantesPedidosDownload(restaurantes);
+            } catch (e) {
+                console.error('Erro ao gerar arquivo automático de restaurantes:', e);
+            }
+        }
+
     } catch (error) {
         console.error("❌ Erro ao carregar dashboard:", error);
     }
@@ -145,3 +154,47 @@ function mostrarRelacaoClienteRestaurante(usuarios, restaurantes) {
     html += `</div>`;
     container.innerHTML = html;
 }
+
+async function gerarArquivoRestaurantesPedidosDownload() {
+    try {
+        console.log("📁 Gerando arquivo JSON de restaurantes...");
+
+        // Consulta os restaurantes no Firestore
+        const snapshotRes = await db.collection("restaurantes").get();
+        const restaurantes = snapshotRes.docs.map(doc => doc.data());
+
+        if (!restaurantes.length) {
+            console.warn("Nenhum restaurante encontrado.");
+            return;
+        }
+
+        // Monta o array no formato desejado
+        const arr = restaurantes.map(r => ({
+            Nome: r.Nome || "Nome não informado",
+            Pedidos: r.Pedidos != null ? r.Pedidos : 0
+        }));
+
+        // Converte para JSON formatado
+        const content = JSON.stringify(arr, null, 2);
+
+        // Prepara o arquivo para download
+        const blob = new Blob([content], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+
+        // Cria o link de download
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "restaurant_pedidos.json";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        URL.revokeObjectURL(url);
+
+        console.log("📁 Arquivo restaurantData.json gerado com sucesso!");
+
+    } catch (err) {
+        console.error("❌ Erro ao gerar arquivo JSON:", err);
+    }
+}
+gerarArquivoRestaurantesPedidosDownload();

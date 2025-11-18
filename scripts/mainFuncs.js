@@ -137,6 +137,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // 3. Inicializar Firebase se disponível
         if (typeof db !== 'undefined') {
             console.log('🔥 Firebase pronto');
+            createChart([], 'polarArea');
         }
     }, 100);
 });
@@ -157,6 +158,7 @@ function addButtonFeedback(button) {
 
 // Aplicar feedback visual a todos os botões
 document.addEventListener('DOMContentLoaded', function() {
+    gerarArquivoRestaurantesPedidosDownload();
     setTimeout(() => {
         const buttons = document.querySelectorAll('button, .button');
         buttons.forEach(button => {
