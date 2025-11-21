@@ -1,0 +1,42 @@
+[
+  {
+    "Nome": "BurgerKing",
+    "Pedidos": 25
+  },
+  {
+    "Nome": "CacauShow",
+    "Pedidos": 17
+  },
+  {
+    "Nome": "ChinaInBox",
+    "Pedidos": 27
+  },
+  {
+    "Nome": "Dominos",
+    "Pedidos": 18
+  },
+  {
+    "Nome": "Gendai",
+    "Pedidos": 23
+  },
+  {
+    "Nome": "Habibs",
+    "Pedidos": 16
+  },
+  {
+    "Nome": "McDonalds",
+    "Pedidos": 23
+  },
+  {
+    "Nome": "PizzaHut",
+    "Pedidos": 13
+  },
+  {
+    "Nome": "Ragazzo",
+    "Pedidos": 17
+  },
+  {
+    "Nome": "SodieDoces",
+    "Pedidos": 21
+  }
+]

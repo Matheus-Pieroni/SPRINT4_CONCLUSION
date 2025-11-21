@@ -400,31 +400,32 @@
                 <div style="background: #fff3cd; padding: 20px; border-radius: 8px; border: 1px solid #ffeaa7; margin: 20px 0;">
                     <h3 style="color: #856404;">⚡ Ações Rápidas</h3>
                     
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0;">
-                        <button onclick="gerarDadosTeste()" class="button" 
-                                style="background: #28a745; padding: 15px;">
-                            🎯 Gerar Dados de Teste<br>
-                            <small>(20 clientes + 50 pedidos)</small>
+                    <div style="display: grid; gap: 15px; margin: 20px 0;">
+                        <!-- Botão para gerar dados completos (clientes + pedidos) -->
+                        <button onclick="gerarDadosTeste()" class="button">
+                            🎮 Gerar Dados Completos (20 clientes + 50 pedidos)
                         </button>
-                        
-                        <button onclick="geradorDados.gerarDadosCompletos(10, 25)" class="button"
-                                style="background: #17a2b8; padding: 15px;">
-                            🧪 Teste Pequeno<br>
-                            <small>(10 clientes + 25 pedidos)</small>
-                        </button>
-                    </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <button onclick="geradorDados.gerarClientes(5)" class="button"
-                                style="background: #6f42c1; padding: 12px;">
-                            👥 Apenas Clientes<br>
-                            <small>(5 novos clientes)</small>
+                        <!-- Botão para gerar apenas pedidos -->
+                        <button onclick="gerarApenasPedidos(10)" class="button">
+                            📦 Criar 10 Pedidos
                         </button>
-                        
-                        <button onclick="geradorDados.gerarPedidos(10)" class="button"
-                                style="background: #fd7e14; padding: 12px;">
-                            📦 Apenas Pedidos<br>
-                            <small>(10 novos pedidos)</small>
+
+                        <!-- Botão para gerar apenas clientes -->
+                        <button onclick="gerarApenasClientes(5)" class="button">
+                            👥 Criar 5 Clientes
+                        </button>
+
+                        <h4 style="color: #b71c1c;">🚨 EMERGÊNCIA - Atualização Manual</h4>
+                        <p><small>Use se o JSON não estiver atualizando automaticamente</small></p>
+                        <button onclick="forcarAtualizacaoJSON()" 
+                                style="background: #b71c1c; color: white; padding: 10px 15px; border: none; border-radius: 5px; margin: 5px;">
+                            🔥 FORÇAR ATUALIZAÇÃO DO JSON
+                        </button>
+
+                        <!-- Botão para limpar dados -->
+                        <button onclick="limparDadosTeste()" class="button">
+                            🧹 Limpar Todos os Dados
                         </button>
                     </div>
                 </div>
@@ -453,8 +454,8 @@
     <script src="scripts/firebaseconf.js"></script>
     <script src="scripts/mainFuncs.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="scripts/sistemaPedidos.js"></script> <!-- Primeiro Funcional -->
     <script src="scripts/startProc/init.js"></script>
+    <script src="scripts/syncManager.js"></script>
     <script src="scripts/firebaseRestsRESET.js"></script>
     <script src="scripts/firebaseData.js"></script>
     <script src="scripts/calculosFinan.js"></script>

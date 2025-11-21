@@ -28,12 +28,11 @@ async function carregDashboardFinanceiro() {
             atualizarGraficoPizza(restaurantes);
         }
 
-        // Gerar automaticamente o arquivo JSON (array) de restaurantes+pedidos ao carregar o dashboard
-        if (typeof gerarArquivoRestaurantesPedidosDownload === 'function') {
+        if (typeof gerarArquivoRestaurantesPedidos === 'function') {
             try {
-                gerarArquivoRestaurantesPedidosDownload(restaurantes);
+                await gerarArquivoRestaurantesPedidos(); // ✅ Agora salva localmente
             } catch (e) {
-                console.error('Erro ao gerar arquivo automático de restaurantes:', e);
+                console.error('Erro ao gerar dados de restaurantes:', e);
             }
         }
 
@@ -155,46 +154,98 @@ function mostrarRelacaoClienteRestaurante(usuarios, restaurantes) {
     container.innerHTML = html;
 }
 
-async function gerarArquivoRestaurantesPedidosDownload() {
+async function sincronizarDadosRestaurantes() {
     try {
-        console.log("📁 Gerando arquivo JSON de restaurantes...");
-
-        // Consulta os restaurantes no Firestore
-        const snapshotRes = await db.collection("restaurantes").get();
-        const restaurantes = snapshotRes.docs.map(doc => doc.data());
-
-        if (!restaurantes.length) {
-            console.warn("Nenhum restaurante encontrado.");
-            return;
+        console.log("🔄 Sincronizando dados dos restaurantes...");
+        
+        if (typeof syncManager !== 'undefined') {
+            return await syncManager.sincronizarRestaurantes();
+        } else {
+            // Fallback: sincronização manual
+            const snapshotRes = await db.collection("restaurantes").get();
+            const restaurantes = snapshotRes.docs.map(doc => doc.data());
+            
+            const arr = restaurantes.map(r => ({
+                Nome: r.Nome || "Nome não informado",
+                Pedidos: r.Pedidos != null ? r.Pedidos : 0
+            }));
+            
+            localStorage.setItem('restaurantes_pedidos', JSON.stringify(arr));
+            
+            window.dispatchEvent(new CustomEvent('dadosRestaurantesAtualizados', {
+                detail: arr
+            }));
+            
+            return arr;
         }
-
-        // Monta o array no formato desejado
-        const arr = restaurantes.map(r => ({
-            Nome: r.Nome || "Nome não informado",
-            Pedidos: r.Pedidos != null ? r.Pedidos : 0
-        }));
-
-        // Converte para JSON formatado
-        const content = JSON.stringify(arr, null, 2);
-
-        // Prepara o arquivo para download
-        const blob = new Blob([content], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-
-        // Cria o link de download
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "restaurant_pedidos.json";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-
-        URL.revokeObjectURL(url);
-
-        console.log("📁 Arquivo restaurantData.json gerado com sucesso!");
-
     } catch (err) {
-        console.error("❌ Erro ao gerar arquivo JSON:", err);
+        console.error("❌ Erro ao sincronizar dados:", err);
+        return [];
     }
 }
-gerarArquivoRestaurantesPedidosDownload();
+
+// 🔄 ATUALIZAR o carregDashboardFinanceiro:
+async function carregDashboardFinanceiro() {
+    try {
+        console.log("📊 Carregando dashboard financeiro...");
+        
+        const [pedidosSnapshot, restaurantesSnapshot, usuariosSnapshot] = await Promise.all([
+            db.collection("pedidos").get(),
+            db.collection("restaurantes").get(),
+            db.collection("usuarios").get()
+        ]);
+
+        const pedidos = pedidosSnapshot.docs.map(doc => doc.data());
+        const restaurantes = restaurantesSnapshot.docs.map(doc => doc.data());
+        const usuarios = usuariosSnapshot.docs.map(doc => doc.data());
+
+        console.log("📦 Pedidos:", pedidos.length);
+        console.log("🏪 Restaurantes:", restaurantes.length);
+        console.log("👥 Usuários:", usuarios.length);
+
+        // ✅ SEMPRE SINCRONIZAR OS DADOS
+        await sincronizarDadosRestaurantes();
+
+        // ... resto do código existente
+        calculusMetricaFinan(pedidos, restaurantes, usuarios);
+        mostrarRelacaoClienteRestaurante(usuarios, restaurantes);
+        gerarRankRestaus(restaurantes);
+        
+        if (typeof atualizarGraficoPizza !== 'undefined') {
+            atualizarGraficoPizza(restaurantes);
+        }
+
+    } catch (error) {
+        console.error("❌ Erro ao carregar dashboard:", error);
+    }
+}
+async function forcarAtualizacaoJSON() {
+    try {
+        console.log("🚨 FORÇANDO ATUALIZAÇÃO DO JSON/LOCALSTORAGE...");
+        
+        // Buscar dados FRESCOS do Firestore
+        const snapshotRes = await db.collection("restaurantes").get();
+        const restaurantes = snapshotRes.docs.map(doc => {
+            const data = doc.data();
+            return {
+                Nome: data.Nome || "Nome não informado",
+                Pedidos: data.Pedidos != null ? data.Pedidos : 0
+            };
+        });
+
+        // Salvar NO LOCALSTORAGE
+        localStorage.setItem('restaurantes_pedidos', JSON.stringify(restaurantes));
+        
+        console.log("✅ JSON ATUALIZADO! Dados:", restaurantes);
+        
+        // Disparar evento para o gráfico
+        window.dispatchEvent(new CustomEvent('dadosRestaurantesAtualizados', {
+            detail: restaurantes
+        }));
+
+        return restaurantes;
+        
+    } catch (error) {
+        console.error("❌ ERRO na atualização forçada:", error);
+    }
+}

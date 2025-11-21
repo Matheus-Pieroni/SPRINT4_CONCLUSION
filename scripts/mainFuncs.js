@@ -112,7 +112,6 @@ function carregarDadosDaSecao(sectionName) {
     }
 }
 
-// Mostrar seção principal quando a página carrega
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Página carregada - inicializando...');
     
@@ -127,7 +126,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // 2. Mostrar a seção principal
         const mainSection = document.getElementById('main-section');
-
         if (mainSection) {
             mainSection.style.display = 'block';
             mainSection.classList.add('active');
@@ -137,10 +135,17 @@ document.addEventListener('DOMContentLoaded', function() {
         // 3. Inicializar Firebase se disponível
         if (typeof db !== 'undefined') {
             console.log('🔥 Firebase pronto');
-            createChart([], 'polarArea');
+        }
+        
+        // 4. ✅ INICIALIZAR DADOS LOCALMENTE SE PRECISAR
+        if (typeof gerarArquivoRestaurantesPedidos === 'function') {
+            setTimeout(() => {
+                gerarArquivoRestaurantesPedidos();
+            }, 2000);
         }
     }, 100);
 });
+
 
 // Função para adicionar feedback visual em botões
 function addButtonFeedback(button) {
@@ -158,7 +163,7 @@ function addButtonFeedback(button) {
 
 // Aplicar feedback visual a todos os botões
 document.addEventListener('DOMContentLoaded', function() {
-    gerarArquivoRestaurantesPedidosDownload();
+    //gerarArquivoRestaurantesPedidosDownload();
     setTimeout(() => {
         const buttons = document.querySelectorAll('button, .button');
         buttons.forEach(button => {

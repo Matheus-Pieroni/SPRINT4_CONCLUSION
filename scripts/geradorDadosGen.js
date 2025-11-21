@@ -1,4 +1,4 @@
-// scripts/geradorDadosTeste.js - VERSÃO CORRIGIDA E ALINHADA
+// scripts/geradorDadosGen.js - VERSÃO COMPLETAMENTE CORRIGIDA
 
 class GeradorDadosTeste {
     constructor() {
@@ -9,13 +9,11 @@ class GeradorDadosTeste {
             'Gabriel Cardoso', 'Larissa Dias', 'Rodrigo Mendes', 'Tatiane Araujo', 'Marcos Pinto'
         ];
 
-        // 🏪 RESTAURANTES OFICIAIS DO APP (10 EMPRESAS)
         this.restaurantes = [
             'McDonalds', 'BurgerKing', 'SodieDoces', 'CacauShow', 'PizzaHut',
             'Dominos', 'Gendai', 'ChinaInBox', 'Habibs', 'Ragazzo'
         ];
 
-        // 🍕 CATEGORIAS OFICIAIS DO APP
         this.categorias = {
             'Lanche': ['McDonalds', 'BurgerKing'],
             'Doces': ['SodieDoces', 'CacauShow'],
@@ -27,39 +25,34 @@ class GeradorDadosTeste {
         this.provedoresEmail = ['gmail.com', 'hotmail.com', 'outlook.com', 'yahoo.com', 'icloud.com'];
     }
 
-    // Gerar email a partir do nome
     gerarEmail(nome) {
         const nomeFormatado = nome.toLowerCase().replace(/\s+/g, '.');
         const provedor = this.provedoresEmail[Math.floor(Math.random() * this.provedoresEmail.length)];
         return `${nomeFormatado}@${provedor}`;
     }
 
-    // Gerar data de assinatura aleatória (últimos 24 meses)
     gerarDataAssinatura() {
         const data = new Date();
-        const mesesAtras = Math.floor(Math.random() * 24) + 1; // 1 a 24 meses atrás
+        const mesesAtras = Math.floor(Math.random() * 24) + 1;
         data.setMonth(data.getMonth() - mesesAtras);
         return firebase.firestore.Timestamp.fromDate(data);
     }
 
-    // 🔥 NOVO: Gerar comida preferida ALINHADA com os restaurantes disponíveis
     gerarComidaPreferida() {
         const categorias = Object.keys(this.categorias);
         return categorias[Math.floor(Math.random() * categorias.length)];
     }
 
-    // 🔥 NOVO: Gerar restaurante preferido baseado na comida preferida
     gerarRestaurantePreferido(comidaPreferida) {
         const restaurantesDaCategoria = this.categorias[comidaPreferida];
         return restaurantesDaCategoria[Math.floor(Math.random() * restaurantesDaCategoria.length)];
     }
 
-    // Gerar um cliente fictício ALINHADO
     gerarCliente() {
         const nome = this.nomes[Math.floor(Math.random() * this.nomes.length)];
         const email = this.gerarEmail(nome);
-        const comidPref = this.gerarComidaPreferida(); // ✅ Agora alinhado
-        const partner_choice = this.gerarRestaurantePreferido(comidPref); // ✅ Agora coerente
+        const comidPref = this.gerarComidaPreferida();
+        const partner_choice = this.gerarRestaurantePreferido(comidPref);
         const dataAssinatura = this.gerarDataAssinatura();
 
         console.log(`👤 Cliente gerado: ${nome} | Prefere: ${comidPref} | Restaurante: ${partner_choice}`);
@@ -74,18 +67,33 @@ class GeradorDadosTeste {
         };
     }
 
-    // Gerar um pedido fictício ALINHADO
-    gerarPedido(clientes) {
-        const cliente = clientes[Math.floor(Math.random() * clientes.length)];
+    async gerarPedido(clientes) {
+        if (!clientes || !Array.isArray(clientes) || clientes.length === 0) {
+            console.warn("⚠️ Array de clientes vazio ou inválido, carregando do Firestore...");
+            
+            try {
+                const clientesSnapshot = await db.collection("usuarios").get();
+                clientes = clientesSnapshot.docs.map(doc => doc.data());
+                
+                if (!clientes || clientes.length === 0) {
+                    console.error("❌ ERRO CRÍTICO: Nenhum cliente encontrado no Firestore!");
+                    throw new Error("Nenhum cliente disponível para gerar pedidos");
+                }
+                
+                console.log(`✅ Carregados ${clientes.length} clientes do Firestore`);
+            } catch (error) {
+                console.error("❌ Erro ao carregar clientes:", error);
+                throw error;
+            }
+        }
         
-        // ✅ Garantir que o pedido seja em um restaurante da categoria preferida do cliente
+        const cliente = clientes[Math.floor(Math.random() * clientes.length)];
         const restaurantesCompativeis = this.categorias[cliente.comidPref] || this.restaurantes;
         const restaurante = restaurantesCompativeis[Math.floor(Math.random() * restaurantesCompativeis.length)];
         
-        const valor = parseFloat((Math.random() * 50 + 15).toFixed(2)); // R$ 15 a R$ 65
+        const valor = parseFloat((Math.random() * 50 + 15).toFixed(2));
         const taxaApp = parseFloat((valor * 0.15).toFixed(2));
         
-        // Data aleatória nos últimos 30 dias
         const data = new Date();
         const diasAtras = Math.floor(Math.random() * 30);
         data.setDate(data.getDate() - diasAtras);
@@ -103,7 +111,6 @@ class GeradorDadosTeste {
         };
     }
 
-    // Gerar múltiplos clientes
     async gerarClientes(quantidade = 20) {
         console.log(`👥 Gerando ${quantidade} clientes de teste ALINHADOS...`);
         
@@ -128,28 +135,53 @@ class GeradorDadosTeste {
         }
     }
 
-    // Gerar múltiplos pedidos ALINHADOS
     async gerarPedidos(quantidade = 50, clientes) {
         console.log(`📦 Gerando ${quantidade} pedidos de teste ALINHADOS...`);
         
+        if (!clientes) {
+            console.log("🔍 Clientes não fornecidos, carregando do Firestore...");
+            try {
+                const clientesSnapshot = await db.collection("usuarios").get();
+                clientes = clientesSnapshot.docs.map(doc => doc.data());
+                console.log(`✅ Carregados ${clientes.length} clientes do Firestore`);
+            } catch (error) {
+                console.error("❌ Erro ao carregar clientes:", error);
+                throw error;
+            }
+        }
+
+        if (!clientes || clientes.length === 0) {
+            throw new Error("Não há clientes disponíveis para gerar pedidos. Gere clientes primeiro.");
+        }
+        
         const batch = db.batch();
+        const pedidosGerados = [];
 
         for (let i = 0; i < quantidade; i++) {
-            const pedido = this.gerarPedido(clientes);
-            const pedidoRef = db.collection("pedidos").doc();
-            batch.set(pedidoRef, pedido);
+            try {
+                const pedido = await this.gerarPedido(clientes);
+                const pedidoRef = db.collection("pedidos").doc();
+                batch.set(pedidoRef, pedido);
+                pedidosGerados.push(pedido);
+            } catch (error) {
+                console.error(`❌ Erro ao gerar pedido ${i + 1}:`, error);
+            }
         }
 
         try {
             await batch.commit();
-            console.log(`✅ ${quantidade} pedidos ALINHADOS gerados com sucesso!`);
+            console.log(`✅ ${pedidosGerados.length} pedidos ALINHADOS gerados com sucesso!`);
+            
+            // 🔥🔥🔥 ATUALIZAR JSON/LOCALSTORAGE APÓS GERAR PEDIDOS
+            await this.forcarSincronizacao();
+            
+            return pedidosGerados;
         } catch (error) {
-            console.error("❌ Erro ao gerar pedidos:", error);
+            console.error("❌ Erro ao salvar pedidos no Firestore:", error);
             throw error;
         }
     }
 
-    // 🔥 NOVO: Estatísticas de compatibilidade
     async verificarCompatibilidadeDados() {
         console.log("🔍 Verificando compatibilidade dos dados...");
         
@@ -185,7 +217,6 @@ class GeradorDadosTeste {
         }
     }
 
-    // Atualizar estatísticas dos restaurantes baseado nos pedidos gerados
     async atualizarEstatisticasRestaurantes() {
         console.log("📊 Atualizando estatísticas dos restaurantes...");
         
@@ -209,11 +240,23 @@ class GeradorDadosTeste {
                 const taxaAppTotal = pedidosRestaurante.reduce((sum, pedido) => sum + pedido.taxaApp, 0);
 
                 const restauranteRef = db.collection("restaurantes").doc(nomeRestaurante);
-                batch.update(restauranteRef, {
-                    Pedidos: totalPedidos,
-                    receitaTotal: receitaTotal,
-                    taxaApp: taxaAppTotal
-                });
+                
+                const doc = await restauranteRef.get();
+                if (doc.exists) {
+                    batch.update(restauranteRef, {
+                        Pedidos: totalPedidos,
+                        receitaTotal: receitaTotal,
+                        taxaApp: taxaAppTotal
+                    });
+                } else {
+                    console.warn(`⚠️ Documento não existe: ${nomeRestaurante}. Criando...`);
+                    batch.set(restauranteRef, {
+                        Nome: nomeRestaurante,
+                        Pedidos: totalPedidos,
+                        receitaTotal: receitaTotal,
+                        taxaApp: taxaAppTotal
+                    });
+                }
 
                 console.log(`🏪 ${nomeRestaurante}: ${totalPedidos} pedidos, R$ ${receitaTotal.toFixed(2)} receita`);
             }
@@ -225,7 +268,6 @@ class GeradorDadosTeste {
         }
     }
 
-    // 🔥 NOVO: Dashboard de categorias
     async gerarDashboardCategorias() {
         console.log("📈 Gerando dashboard de categorias...");
         
@@ -238,7 +280,6 @@ class GeradorDadosTeste {
             const clientes = clientesSnapshot.docs.map(doc => doc.data());
             const pedidos = pedidosSnapshot.docs.map(doc => doc.data());
 
-            // Estatísticas por categoria
             const statsCategorias = {};
             Object.keys(this.categorias).forEach(categoria => {
                 statsCategorias[categoria] = {
@@ -249,16 +290,13 @@ class GeradorDadosTeste {
                 };
             });
 
-            // Contar clientes por categoria
             clientes.forEach(cliente => {
                 if (statsCategorias[cliente.comidPref]) {
                     statsCategorias[cliente.comidPref].clientes++;
                 }
             });
 
-            // Contar pedidos e receita por categoria
             pedidos.forEach(pedido => {
-                // Encontrar a categoria do restaurante
                 for (const [categoria, restaurantes] of Object.entries(this.categorias)) {
                     if (restaurantes.includes(pedido.restaurante)) {
                         statsCategorias[categoria].pedidos++;
@@ -276,28 +314,66 @@ class GeradorDadosTeste {
         }
     }
 
-    // Função principal para gerar dados completos ALINHADOS
+    // 🔥🔥🔥 FUNÇÃO CORRIGIDA - AGORA DENTRO DA CLASSE
+    async forcarSincronizacao() {
+        console.log("🔁 Forçando sincronização de dados...");
+        
+        try {
+            // 1. Atualizar estatísticas primeiro
+            await this.atualizarEstatisticasRestaurantes();
+            
+            // 2. Buscar dados ATUALIZADOS do Firestore
+            const snapshotRes = await db.collection("restaurantes").get();
+            const restaurantes = snapshotRes.docs.map(doc => doc.data());
+            
+            // 3. Formatar dados para JSON
+            const arr = restaurantes.map(r => ({
+                Nome: r.Nome || "Nome não informado",
+                Pedidos: r.Pedidos != null ? r.Pedidos : 0
+            }));
+            
+            // 4. SALVAR NO LOCALSTORAGE (nosso "arquivo .json")
+            localStorage.setItem('restaurantes_pedidos', JSON.stringify(arr));
+            
+            // 5. Disparar evento para atualizar gráficos
+            window.dispatchEvent(new CustomEvent('dadosRestaurantesAtualizados', {
+                detail: arr
+            }));
+            
+            console.log("✅ JSON/LOCALSTORAGE ATUALIZADO! Dados:", arr);
+            
+        } catch (error) {
+            console.error("❌ Erro na sincronização forçada:", error);
+        }
+    }
+
     async gerarDadosCompletos(quantidadeClientes = 20, quantidadePedidos = 50) {
         console.log("🎮 INICIANDO GERAÇÃO DE DADOS DE TESTE ALINHADOS...");
         
         try {
             // 1. Gerar clientes ALINHADOS
+            console.log(`👥 Passo 1: Gerando ${quantidadeClientes} clientes...`);
             const clientes = await this.gerarClientes(quantidadeClientes);
             
             // 2. Gerar pedidos ALINHADOS
+            console.log(`📦 Passo 2: Gerando ${quantidadePedidos} pedidos...`);
             await this.gerarPedidos(quantidadePedidos, clientes);
             
-            // 3. Atualizar estatísticas
-            await this.atualizarEstatisticasRestaurantes();
+            // 3. 🔥 FORÇAR SINCRONIZAÇÃO IMEDIATA
+            console.log("🔁 Passo 3: Sincronizando dados...");
+            await this.forcarSincronizacao();
             
             // 4. Verificar compatibilidade
+            console.log("🔍 Passo 4: Verificando compatibilidade...");
             const compatibilidade = await this.verificarCompatibilidadeDados();
             
             // 5. Gerar dashboard de categorias
+            console.log("📈 Passo 5: Gerando dashboard...");
             const dashboardCategorias = await this.gerarDashboardCategorias();
             
-            // 6. Recarregar dashboard se estiver aberto
+            // 6. Recarregar dashboard
             if (typeof carregDashboardFinanceiro !== 'undefined') {
+                console.log("🔄 Recarregando dashboard...");
                 carregDashboardFinanceiro();
             }
 
@@ -315,14 +391,15 @@ ${Object.entries(dashboardCategorias).map(([categoria, stats]) =>
 ).join('\n')}
             `;
             
+            console.log(mensagem);
             alert(mensagem);
             
         } catch (error) {
+            console.error("❌ Erro ao gerar dados completos:", error);
             alert("❌ Erro ao gerar dados de teste: " + error.message);
         }
     }
 
-    // Limpar todos os dados de teste
     async limparDadosTeste() {
         if (!confirm('🚨 ATENÇÃO: Isso irá apagar TODOS os clientes e pedidos. Tem certeza?')) {
             return;
@@ -362,6 +439,9 @@ ${Object.entries(dashboardCategorias).map(([categoria, stats]) =>
             console.log("✅ Dados de teste limpos com sucesso!");
             alert("✅ Todos os dados de teste foram removidos!");
 
+            // 🔥 ATUALIZAR JSON APÓS LIMPAR
+            await this.forcarSincronizacao();
+
             if (typeof carregDashboardFinanceiro !== 'undefined') {
                 carregDashboardFinanceiro();
             }
@@ -376,9 +456,42 @@ ${Object.entries(dashboardCategorias).map(([categoria, stats]) =>
 // Instância global do gerador
 const geradorDados = new GeradorDadosTeste();
 
-// Funções globais para acesso via HTML
+// ✅ FUNÇÕES GLOBAIS CORRIGIDAS
+
 async function gerarDadosTeste() {
-    await geradorDados.gerarDadosCompletos(20, 50);
+    try {
+        await geradorDados.gerarDadosCompletos(20, 50);
+    } catch (error) {
+        console.error("❌ Erro na função gerarDadosTeste:", error);
+        alert("❌ Erro ao gerar dados: " + error.message);
+    }
+}
+
+async function gerarApenasPedidos(quantidade = 10) {
+    try {
+        console.log(`📦 Gerando ${quantidade} pedidos...`);
+        await geradorDados.gerarPedidos(quantidade);
+        alert(`✅ ${quantidade} pedidos gerados com sucesso!`);
+        
+        // Atualizar dashboard
+        if (typeof carregDashboardFinanceiro !== 'undefined') {
+            carregDashboardFinanceiro();
+        }
+    } catch (error) {
+        console.error("❌ Erro ao gerar pedidos:", error);
+        alert("❌ Erro ao gerar pedidos: " + error.message);
+    }
+}
+
+async function gerarApenasClientes(quantidade = 10) {
+    try {
+        console.log(`👥 Gerando ${quantidade} clientes...`);
+        await geradorDados.gerarClientes(quantidade);
+        alert(`✅ ${quantidade} clientes gerados com sucesso!`);
+    } catch (error) {
+        console.error("❌ Erro ao gerar clientes:", error);
+        alert("❌ Erro ao gerar clientes: " + error.message);
+    }
 }
 
 async function limparDadosTeste() {
@@ -429,7 +542,6 @@ async function atualizarEstatisticas() {
                 </div>
             `;
             
-            // Remover loading e adicionar fade-in
             setTimeout(() => {
                 container.classList.remove('pulse-loading');
                 container.classList.add('fade-in');
